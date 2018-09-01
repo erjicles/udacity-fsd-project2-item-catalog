@@ -8,7 +8,7 @@ APPLICATION_NAME = "Item Catalog Application"
 @app.route('/')
 @app.route('/category/')
 def showCategories():
-    return render_template('main.html')
+    return render_template('categories.html')
 
 
 if __name__ == '__main__':
