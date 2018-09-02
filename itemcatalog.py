@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
-from sqlalchemy import create_engine, asc
+from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, User, Category, Item
 import json
@@ -23,7 +23,10 @@ session = DBSession()
 @app.route('/category/')
 def showCategories():
     categories = session.query(Category).order_by(asc(Category.name)).all()
-    return render_template('categories.html', categories=categories)
+    latestItems = session.query(Item).order_by(desc(Item.id)).limit(10).all()
+    return render_template('categories.html', 
+        categories=categories,
+        latestItems=latestItems)
 
 
 # Create a new category
