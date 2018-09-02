@@ -26,6 +26,19 @@ def showCategories():
     return render_template('categories.html', categories=categories)
 
 
+# Create a new category
+@app.route('/category/new/', methods=['GET', 'POST'])
+def newCategory():
+    if request.method == 'POST':
+        newCategory = Category(
+            name=request.form['name'])
+        session.add(newCategory)
+        session.commit()
+        return redirect(url_for('showCategories'))
+    else:
+        return render_template('newcategory.html')
+
+
 if __name__ == '__main__':
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
