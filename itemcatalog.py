@@ -39,6 +39,21 @@ def newCategory():
         return render_template('newcategory.html')
 
 
+# Edit an existing category
+@app.route('/category/<int:category_id>/edit/', methods=['GET', 'POST'])
+def editCategory(category_id):
+    editedCategory = session.query(
+        Category).filter_by(id=category_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            editedCategory.name = request.form['name']
+            session.add(editedCategory)
+            session.commit()
+            return redirect(url_for('showCategories'))
+    else:
+        return render_template('editcategory.html', category=editedCategory)
+
+
 if __name__ == '__main__':
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
