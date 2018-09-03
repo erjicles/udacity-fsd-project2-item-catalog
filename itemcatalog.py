@@ -138,6 +138,8 @@ def gconnect():
     if not user_id:
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
+    user_info = getUserInfo(user_id)
+    login_session['is_admin'] = user_info.is_admin
 
     output = ''
     output += '<h1>Welcome, '
@@ -209,6 +211,10 @@ def showCategories():
 def newCategory():
     if 'username' not in login_session:
         return redirect('/login')
+    if 'is_admin' not in login_session:
+        return redirect('login')
+    if login_session['is_admin'] == 0:
+        return redirect(url_for('showCategories'))
     if request.method == 'POST':
         newCategory = Category(
             name=request.form['name'])
@@ -224,6 +230,10 @@ def newCategory():
 def editCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
+    if 'is_admin' not in login_session:
+        return redirect('login')
+    if login_session['is_admin'] == 0:
+        return redirect(url_for('showCategories'))
     editedCategory = session.query(
         Category).filter_by(id=category_id).one()
     if request.method == 'POST':
@@ -241,6 +251,10 @@ def editCategory(category_id):
 def deleteCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
+    if 'is_admin' not in login_session:
+        return redirect('login')
+    if login_session['is_admin'] == 0:
+        return redirect(url_for('showCategories'))
     categoryToDelete = session.query(
         Category).filter_by(id=category_id).one()
     if request.method == 'POST':
