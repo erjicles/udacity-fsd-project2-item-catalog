@@ -203,7 +203,8 @@ def showCategories():
     latestItems = session.query(Item).order_by(desc(Item.id)).limit(10).all()
     return render_template('categories.html', 
         categories=categories,
-        latestItems=latestItems)
+        latestItems=latestItems,
+        user_id=login_session['user_id'])
 
 
 # Create a new category
@@ -275,7 +276,8 @@ def showCategory(category_id):
     return render_template('category.html', 
         categories=categories,
         category=category,
-        items=items)
+        items=items,
+        user_id=login_session['user_id'])
 
 
 # Add new item to category
@@ -314,6 +316,22 @@ def editItem(item_id):
         return redirect(url_for('showCategory', category_id=item.category_id))
     else:
         return render_template('edititem.html', item=item)
+
+
+# Delete existing item
+@app.route('/catalog/item/<int:item_id>/delete/', methods=['GET', 'POST'])
+def deleteItem(item_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    item = session.query(Item).filter_by(id=item_id).one()
+    if login_session['user_id'] != item.user_id:
+        return render_template('deleteitem.html', item=item, forbidden=True)
+    if request.method == 'POST':
+        session.delete(item)
+        session.commit()
+        return redirect(url_for('showCategory', category_id=item.category_id))
+    else:
+        return render_template('deleteitem.html', item=item)
 
 
 if __name__ == '__main__':

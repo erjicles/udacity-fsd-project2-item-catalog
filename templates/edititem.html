@@ -8,6 +8,10 @@
 </div>
 <div class="row">
     <div class="col-xs-12">
+        {% if forbidden is defined and forbidden == True %}
+        You are not authorized to perform this action<br />
+        <a href="{{url_for('showCategory', category_id=item.category_id)}}">Return To Category</a>
+        {% else %}
         <form action="#" method="post">
             <div class="row">
                 <div class="col-xs-12">
@@ -26,11 +30,12 @@
                     <button type="submit" id="submit" type="submit">
                         Save
                     </button>
-                    <a href="{{url_for('showCategory', category_id=category.id)}}">Cancel</a>
+                    <a href="{{url_for('showCategory', category_id=item.category_id)}}">Cancel</a>
                 </div>
             </div>
             </div>
         </form>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
