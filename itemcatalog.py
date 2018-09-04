@@ -197,7 +197,7 @@ def disconnect():
 
 # Landing page - show all categories and recent items
 @app.route('/')
-@app.route('/category/')
+@app.route('/catalog/')
 def showCategories():
     categories = session.query(Category).order_by(asc(Category.name)).all()
     latestItems = session.query(Item).order_by(desc(Item.id)).limit(10).all()
@@ -207,7 +207,7 @@ def showCategories():
 
 
 # Create a new category
-@app.route('/category/new/', methods=['GET', 'POST'])
+@app.route('/catalog/category/new/', methods=['GET', 'POST'])
 def newCategory():
     if 'username' not in login_session:
         return redirect('/login')
@@ -226,7 +226,7 @@ def newCategory():
 
 
 # Edit an existing category
-@app.route('/category/<int:category_id>/edit/', methods=['GET', 'POST'])
+@app.route('/catalog/category/<int:category_id>/edit/', methods=['GET', 'POST'])
 def editCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -247,7 +247,7 @@ def editCategory(category_id):
 
 
 # Delete a category
-@app.route('/category/<int:category_id>/delete/', methods=['GET', 'POST'])
+@app.route('/catalog/category/<int:category_id>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -266,7 +266,7 @@ def deleteCategory(category_id):
 
 
 # Show all items for a given category
-@app.route('/category/<int:category_id>/items')
+@app.route('/catalog/category/<int:category_id>/items')
 def showCategory(category_id):
     categories = session.query(Category).order_by(asc(Category.name)).all()
     category = [category for category in categories if category.id==category_id][0]
@@ -279,7 +279,7 @@ def showCategory(category_id):
 
 
 # Add new item to category
-@app.route('/category/<int:category_id>/items/new/', methods=['GET', 'POST'])
+@app.route('/catalog/category/<int:category_id>/items/new/', methods=['GET', 'POST'])
 def newItem(category_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -296,6 +296,24 @@ def newItem(category_id):
         return redirect(url_for('showCategory', category_id=category_id))
     else:
         return render_template('newitem.html', category=category)
+
+
+# Edit existing item
+@app.route('/catalog/item/<int:item_id>/edit/', methods=['GET', 'POST'])
+def editItem(item_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    item = session.query(Item).filter_by(id=item_id).one()
+    if login_session['user_id'] != item.user_id:
+        return render_template('edititem.html', item=item, forbidden=True)
+    if request.method == 'POST':
+        item.name = request.form['name']
+        item.description = request.form['description']
+        session.add(item)
+        session.commit()
+        return redirect(url_for('showCategory', category_id=item.category_id))
+    else:
+        return render_template('edititem.html', item=item)
 
 
 if __name__ == '__main__':
