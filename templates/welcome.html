@@ -1,0 +1,21 @@
+{% extends "main.html" %}
+{% block head_extension %}
+<script type="text/javascript">
+    window.addEventListener('load', function() { 
+        setTimeout(function() {
+            window.location.href = "/";
+        }, 4000);
+    }, false);
+</script>
+{% endblock %}
+{% block content %}
+{% include "header.html" %}
+<div class="row">
+    <div class="col-xs-12">
+        <h1>Welcome, {{session['username']}}!</h1>
+        <img src="{{session['picture']}}" 
+            style="width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;">
+        Redirecting...
+    </div>
+</div>
+{% endblock %}

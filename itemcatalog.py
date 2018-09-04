@@ -141,16 +141,8 @@ def gconnect():
     user_info = getUserInfo(user_id)
     login_session['is_admin'] = user_info.is_admin
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
-    print (")done!")
-    return output
+    print ("Done!")
+    return "Login successful"
 
 
 @app.route('/gdisconnect')
@@ -194,6 +186,14 @@ def disconnect():
     else:
         flash("You were not logged in")
         return redirect(url_for('showCategories'))
+
+
+# Welcome page after logging in
+@app.route('/welcome/')
+def showWelcome():
+    if 'username' not in login_session:
+        return redirect('/login')
+    return render_template('welcome.html')
 
 
 # Landing page - show all categories and recent items
