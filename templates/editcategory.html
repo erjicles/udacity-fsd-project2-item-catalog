@@ -1,7 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-{% if session.get('is_admin') == True %}
 <div class="row">
     <div class="col-xs-12">
         <h1>Edit {{category.name}}</h1>
@@ -28,12 +27,4 @@
         </form>
     </div>
 </div>
-{% else %}
-<div class="row">
-    <div class="col-xs-12">
-        You are not authorized to perform this action.
-        <a href="{{url_for('showCategories')}}">Back To Catalog</a>
-    </div>
-</div>
-{% endif %}
 {% endblock %}

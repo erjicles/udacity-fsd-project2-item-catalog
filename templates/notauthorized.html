@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row">
+    <div class="col-xs-12">
+        You are not authorized to perform the requested operation.
+        {% if redirect_endpoint is defined and redirect_endpoint is not none %}
+        <a href="{{url_for(redirect_endpoint)}}">Return To App</a>
+        {% else %}
+        <a href="{{url_for('showCategories')}}">Return Home</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
