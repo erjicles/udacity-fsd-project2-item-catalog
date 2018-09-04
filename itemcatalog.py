@@ -265,6 +265,39 @@ def deleteCategory(category_id):
         return render_template('deleteCategory.html', category=categoryToDelete)
 
 
+# Show all items for a given category
+@app.route('/category/<int:category_id>/items')
+def showCategory(category_id):
+    categories = session.query(Category).order_by(asc(Category.name)).all()
+    category = [category for category in categories if category.id==category_id][0]
+    items = session.query(Item).filter_by(
+        category_id=category_id).order_by(Item.name).all()
+    return render_template('category.html', 
+        categories=categories,
+        category=category,
+        items=items)
+
+
+# Add new item to category
+@app.route('/category/<int:category_id>/items/new/', methods=['GET', 'POST'])
+def newItem(category_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    category = session.query(
+        Category).filter_by(id=category_id).one()
+    if request.method == 'POST':
+        newItem = Item(
+            name=request.form['name'],
+            description=request.form['description'],
+            category_id=category_id,
+            user_id=login_session['user_id'])
+        session.add(newItem)
+        session.commit()
+        return redirect(url_for('showCategory', category_id=category_id))
+    else:
+        return render_template('newitem.html', category=category)
+
+
 if __name__ == '__main__':
     app.secret_key = json.loads(
         open('app_secrets.json', 'r').read())['app']['app_secret_key']

@@ -3,7 +3,7 @@
 {% include "header.html" %}
 <div class="row">
     <div class="col-xs-12">
-        <h1>New Category</h1>
+        <h1>New Item ({{category.name}})</h1>
     </div>
 </div>
 <div class="row">
@@ -13,6 +13,12 @@
                 <div class="col-xs-12">
                     <label for="name">Name:</label>
                     <input type="text" maxlength="250" name="name">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <label for="description">Description:</label>
+                    <input type="text" maxlength="250" name="description">
                 </div>
             </div>
             <div class="row">
