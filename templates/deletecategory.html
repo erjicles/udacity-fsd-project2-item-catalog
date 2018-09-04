@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+{% if session.get('is_admin') == True %}
 <div class="row">
     <div class="col-xs-12">
         <h2> Are you sure you want to delete {{category.name}}?</h2>
@@ -14,4 +15,12 @@
         </form>
     </div>
 </div>
+{% else %}
+<div class="row">
+    <div class="col-xs-12">
+        You are not authorized to perform this action.
+        <a href="{{url_for('showCategory', category_id=category.id)}}">Back To Category</a>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

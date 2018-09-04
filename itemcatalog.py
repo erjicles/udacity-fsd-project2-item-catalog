@@ -187,6 +187,7 @@ def disconnect():
         del login_session['email']
         del login_session['picture']
         del login_session['user_id']
+        del login_session['is_admin']
         del login_session['provider']
         flash("You have successfully been logged out.")
         return redirect(url_for('showCategories'))
@@ -200,11 +201,10 @@ def disconnect():
 @app.route('/catalog/')
 def showCategories():
     categories = session.query(Category).order_by(asc(Category.name)).all()
-    latestItems = session.query(Item).order_by(desc(Item.id)).limit(10).all()
+    latestItems = session.query(Item).order_by(desc(Item.id)).limit(10).all() 
     return render_template('categories.html', 
         categories=categories,
-        latestItems=latestItems,
-        user_id=login_session['user_id'])
+        latestItems=latestItems)
 
 
 # Create a new category
@@ -212,10 +212,6 @@ def showCategories():
 def newCategory():
     if 'username' not in login_session:
         return redirect('/login')
-    if 'is_admin' not in login_session:
-        return redirect('login')
-    if login_session['is_admin'] == 0:
-        return redirect(url_for('showCategories'))
     if request.method == 'POST':
         newCategory = Category(
             name=request.form['name'])
@@ -231,10 +227,6 @@ def newCategory():
 def editCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
-    if 'is_admin' not in login_session:
-        return redirect('login')
-    if login_session['is_admin'] == 0:
-        return redirect(url_for('showCategories'))
     editedCategory = session.query(
         Category).filter_by(id=category_id).one()
     if request.method == 'POST':
@@ -242,7 +234,7 @@ def editCategory(category_id):
             editedCategory.name = request.form['name']
             session.add(editedCategory)
             session.commit()
-            return redirect(url_for('showCategories'))
+            return redirect(url_for('showCategory', category_id=category_id))
     else:
         return render_template('editcategory.html', category=editedCategory)
 
@@ -252,10 +244,6 @@ def editCategory(category_id):
 def deleteCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
-    if 'is_admin' not in login_session:
-        return redirect('login')
-    if login_session['is_admin'] == 0:
-        return redirect(url_for('showCategories'))
     categoryToDelete = session.query(
         Category).filter_by(id=category_id).one()
     if request.method == 'POST':
@@ -276,8 +264,7 @@ def showCategory(category_id):
     return render_template('category.html', 
         categories=categories,
         category=category,
-        items=items,
-        user_id=login_session['user_id'])
+        items=items)
 
 
 # Add new item to category
@@ -306,8 +293,6 @@ def editItem(item_id):
     if 'username' not in login_session:
         return redirect('/login')
     item = session.query(Item).filter_by(id=item_id).one()
-    if login_session['user_id'] != item.user_id:
-        return render_template('edititem.html', item=item, forbidden=True)
     if request.method == 'POST':
         item.name = request.form['name']
         item.description = request.form['description']
@@ -324,8 +309,6 @@ def deleteItem(item_id):
     if 'username' not in login_session:
         return redirect('/login')
     item = session.query(Item).filter_by(id=item_id).one()
-    if login_session['user_id'] != item.user_id:
-        return render_template('deleteitem.html', item=item, forbidden=True)
     if request.method == 'POST':
         session.delete(item)
         session.commit()

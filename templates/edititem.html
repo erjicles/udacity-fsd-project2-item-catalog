@@ -8,10 +8,9 @@
 </div>
 <div class="row">
     <div class="col-xs-12">
-        {% if forbidden is defined and forbidden == True %}
-        You are not authorized to perform this action<br />
-        <a href="{{url_for('showCategory', category_id=item.category_id)}}">Return To Category</a>
-        {% else %}
+        {% if (session.get('user_id') is not none
+            and session.get('user_id') == item.user_id) 
+            or session.get('is_admin') == True %}
         <form action="#" method="post">
             <div class="row">
                 <div class="col-xs-12">
@@ -35,6 +34,9 @@
             </div>
             </div>
         </form>
+        {% else %}
+        You are not authorized to perform this action<br />
+        <a href="{{url_for('showCategory', category_id=item.category_id)}}">Return To Category</a>
         {% endif %}
     </div>
 </div>

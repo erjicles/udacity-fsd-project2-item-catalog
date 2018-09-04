@@ -3,6 +3,13 @@
         <h1>Categories</h1>
     </div>
 </div>
+{% if session.get('is_admin') == True %}
+<div class="row">
+    <div class="col-xs-12">
+        <a href="{{url_for('newCategory')}}">Add</a>
+    </div>
+</div>
+{% endif %}
 {% for category in categories %}
     <div class="row">
         <div class="col-xs-12">

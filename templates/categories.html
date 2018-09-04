@@ -15,7 +15,9 @@
             <div class="row">
                 <div class="col-xs-12">
                     <h3>{{item.name}} ({{item.category.name}})</h3>
-                    {% if item.user_id == user_id %}
+                    {% if (session.get('user_id') is not none
+                        and session.get('user_id') == item.user_id) 
+                        or session.get('is_admin') == True %}
                     <a href="{{url_for('editItem', item_id = item.id)}}">Edit</a>
                     <a href="{{url_for('deleteItem', item_id = item.id)}}">Delete</a>
                     {% endif %}
