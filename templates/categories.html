@@ -14,7 +14,7 @@
         {% for item in latestItems %}
             <div class="row">
                 <div class="col-xs-12">
-                    <h3>{{item.name}} ({{item.category.name}})</h3>
+                    <a href="{{url_for('showItem', item_id = item.id)}}">{{item.name}}</a> ({{item.category.name}})
                     {% if (session.get('user_id') is not none
                         and session.get('user_id') == item.user_id) 
                         or session.get('is_admin') == True %}
