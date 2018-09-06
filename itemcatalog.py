@@ -261,7 +261,7 @@ def deleteCategory(category_id):
 
 
 # Show all items for a given category
-@app.route('/catalog/category/<int:category_id>/items')
+@app.route('/catalog/category/<int:category_id>/items/')
 def showCategory(category_id):
     categories = session.query(Category).order_by(asc(Category.name)).all()
     category = [category for category in categories if category.id==category_id][0]
@@ -271,6 +271,14 @@ def showCategory(category_id):
         categories=categories,
         category=category,
         items=items)
+
+
+# Show one item
+@app.route('/catalog/item/<int:item_id>/')
+def showItem(item_id):
+    item = session.query(
+        Item).filter_by(id=item_id).one()
+    return render_template('item.html', item=item)
 
 
 # Add new item to category
@@ -328,6 +336,31 @@ def deleteItem(item_id):
         return redirect(url_for('showCategory', category_id=item.category_id))
     else:
         return render_template('deleteitem.html', item=item)
+
+
+# API endpoint to retrieve all categories
+@app.route('/api/catalog/categories/')
+def getCategories():
+    categories = session.query(Category).all()
+    return jsonify(categories = [i.serialize for i in categories])
+
+
+# API endpoint to retrieve one category
+@app.route('/api/catalog/categories/<int:category_id>/')
+def getCategory(category_id):
+    category = session.query(Category).filter_by(id=category_id).one_or_none()
+    if category is None:
+        return "Not found", 404
+    return jsonify(category = category.serialize)
+
+
+# API endpoint to retrieve one item
+@app.route('/api/catalog/items/<int:item_id>/')
+def getItem(item_id):
+    item = session.query(Item).filter_by(id=item_id).one_or_none()
+    if item is None:
+        return "Not found", 404
+    return jsonify(item = item.serialize)
 
 
 if __name__ == '__main__':
