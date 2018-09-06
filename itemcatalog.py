@@ -232,7 +232,9 @@ def editCategory(category_id):
     if login_session.get('is_admin') != True:
         return render_template('notauthorized.html'), 403
     editedCategory = session.query(
-        Category).filter_by(id=category_id).one()
+        Category).filter_by(id=category_id).one_or_none()
+    if editedCategory is None:
+        return render_template('notfound.html'), 404
     if request.method == 'POST':
         if request.form['name']:
             editedCategory.name = request.form['name']
@@ -251,7 +253,9 @@ def deleteCategory(category_id):
     if login_session.get('is_admin') != True:
         return render_template('notauthorized.html'), 403
     categoryToDelete = session.query(
-        Category).filter_by(id=category_id).one()
+        Category).filter_by(id=category_id).one_or_none()
+    if categoryToDelete is None:
+        return render_template('notfound.html'), 404
     if request.method == 'POST':
         session.delete(categoryToDelete)
         session.commit()
@@ -264,7 +268,9 @@ def deleteCategory(category_id):
 @app.route('/catalog/category/<int:category_id>/items/')
 def showCategory(category_id):
     categories = session.query(Category).order_by(asc(Category.name)).all()
-    category = [category for category in categories if category.id==category_id][0]
+    category = next(iter([category for category in categories if category.id==category_id] or []), None)
+    if category is None:
+        return render_template('notfound.html'), 404
     items = session.query(Item).filter_by(
         category_id=category_id).order_by(Item.name).all()
     return render_template('category.html', 
@@ -277,7 +283,9 @@ def showCategory(category_id):
 @app.route('/catalog/item/<int:item_id>/')
 def showItem(item_id):
     item = session.query(
-        Item).filter_by(id=item_id).one()
+        Item).filter_by(id=item_id).one_or_none()
+    if item is None:
+        return render_template('notfound.html'), 404
     return render_template('item.html', item=item)
 
 
@@ -288,7 +296,9 @@ def newItem(category_id):
         return redirect('/login')
     # Any logged in user can create an item, so don't check user id
     category = session.query(
-        Category).filter_by(id=category_id).one()
+        Category).filter_by(id=category_id).one_or_none()
+    if category is None:
+        return render_template('notfound.html'), 404
     if request.method == 'POST':
         newItem = Item(
             name=request.form['name'],
@@ -307,7 +317,9 @@ def newItem(category_id):
 def editItem(item_id):
     if 'username' not in login_session:
         return redirect('/login')
-    item = session.query(Item).filter_by(id=item_id).one()
+    item = session.query(Item).filter_by(id=item_id).one_or_none()
+    if item is None:
+        return render_template('notfound.html'), 404
     if login_session.get('is_admin') != True and (
             login_session.get('user_id') is None or login_session.get('user_id') != item.user_id):
         return render_template('notauthorized.html'), 403
@@ -326,7 +338,9 @@ def editItem(item_id):
 def deleteItem(item_id):
     if 'username' not in login_session:
         return redirect('/login')
-    item = session.query(Item).filter_by(id=item_id).one()
+    item = session.query(Item).filter_by(id=item_id).one_or_none()
+    if item is None:
+        return render_template('notfound.html'), 404
     if login_session.get('is_admin') != True and (
             login_session.get('user_id') is None or login_session.get('user_id') != item.user_id):
         return render_template('notauthorized.html'), 403

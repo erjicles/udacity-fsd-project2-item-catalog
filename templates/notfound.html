@@ -1,0 +1,11 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row">
+    <div class="col-xs-12">
+        Oh no! We seem to have lost what you're looking for!<br />
+        You guessed it, this is your friendly 404 Not Found page!<br />
+        <a href="{{url_for('showCategories')}}">Pretend this never happened</a>
+    </div>
+</div>
+{% endblock %}
