@@ -318,6 +318,7 @@ def editItem(item_id):
     if 'username' not in login_session:
         return redirect('/login')
     item = session.query(Item).filter_by(id=item_id).one_or_none()
+    categories = session.query(Category).order_by(asc(Category.name)).all()
     if item is None:
         return render_template('notfound.html'), 404
     if login_session.get('is_admin') != True and (
@@ -326,11 +327,19 @@ def editItem(item_id):
     if request.method == 'POST':
         item.name = request.form['name']
         item.description = request.form['description']
+        request_category_id = -1
+        try:
+            request_category_id = int(request.form['category'])
+        except ValueError:
+            return "Invalid category_id: {}".format(request.form['category']), 400
+        if request_category_id not in [category.id for category in categories]:
+            return "category_id does not exist: {}".format(request_category_id), 409
+        item.category_id = request_category_id
         session.add(item)
         session.commit()
         return redirect(url_for('showCategory', category_id=item.category_id))
     else:
-        return render_template('edititem.html', item=item)
+        return render_template('edititem.html', item=item, categories=categories)
 
 
 # Delete existing item

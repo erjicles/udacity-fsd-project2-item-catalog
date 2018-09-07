@@ -23,6 +23,20 @@
             </div>
             <div class="row">
                 <div class="col-xs-12">
+                    <label for="category">Category</label>
+                    <select name="category">
+                        {% for category in categories %}
+                        {% if category.id == item.category_id %}
+                        <option value="{{category.id}}" selected>{{category.name}}</option>
+                        {% else %}
+                        <option value="{{category.id}}">{{category.name}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
                     <button type="submit" id="submit" type="submit">
                         Save
                     </button>
