@@ -1,24 +1,23 @@
 {% extends "main.html" %}
 {% block content %}
-{% include "header.html" %}
-<div class="row">
-    <div class="col-md-4">
+<div class="row border-between">
+    <div class="col-md-3">
         {% include "categorylist.html" %}
     </div>
-    <div class="col-md-8">
+    <div class="col-md-9">
         <div class="row">
             <div class="col-xs-12">
                 <h1>Latest Items</h1>
             </div>
         </div>
         {% for item in latestItems %}
-            <div class="row">
+            <div class="row item">
                 <div class="col-xs-12">
                     <a href="{{url_for('showItem', item_id = item.id)}}">{{item.name}}</a> ({{item.category.name}})
                     {% if (session.get('user_id') is not none
                         and session.get('user_id') == item.user_id) 
                         or session.get('is_admin') == True %}
-                    <a href="{{url_for('editItem', item_id = item.id)}}">Edit</a>
+                    <a href="{{url_for('editItem', item_id = item.id)}}">Edit</a> |
                     <a href="{{url_for('deleteItem', item_id = item.id)}}">Delete</a>
                     {% endif %}
                 </div>

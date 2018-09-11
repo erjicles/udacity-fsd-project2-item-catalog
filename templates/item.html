@@ -1,6 +1,5 @@
 {% extends "main.html" %}
 {% block content %}
-{% include "header.html" %}
 <div class="row">
     <div class="col-xs-12">
         <h1>{{item.name}}</h1>
@@ -13,8 +12,10 @@
 </div>
 <div class="row">
     <div class="col-xs-12">
-        {% if item.description is not none %}
+        {% if item.description is not none and item.description|length > 0 %}
         {{item.description}}
+        {% else %}
+        <span class="text-light">No description</span>
         {% endif %}
     </div>
 </div>
@@ -23,7 +24,7 @@
     or session.get('is_admin') == True %}
 <div class="row">
     <div class="col-xs-12">
-        <a href="{{url_for('editItem', item_id = item.id)}}">Edit</a>
+        <a href="{{url_for('editItem', item_id = item.id)}}">Edit</a> |
         <a href="{{url_for('deleteItem', item_id = item.id)}}">Delete</a>
     </div>
 </div>

@@ -1,0 +1,114 @@
+/*
+Color palette: Fun and Professional
+https://www.canva.com/learn/website-color-schemes/
+*/
+body {
+    background: #4ABDAC; /* Fresh */
+    font-family: "Helvetica Neue Bold", Roboto, Helvetica, Arial, sans-serif;
+    color: #DFDCE3; /* Clean */
+    font-weight: 600;
+    padding-top: 70px;
+}
+
+a {
+    color: #F7B733; /* Sunshine */
+    font-weight: 400;
+}
+
+a.control-link {
+    color: #FC4A1A; /* Vermillion */
+}
+/*
+h1, h2 {
+    color: #F7B733;
+}*/
+
+.navbar-brand {
+    font-size: 24px;
+}
+
+.navbar a{
+    color: #4ABDAC;
+}
+
+.navbar-default {
+    background-color: #f7b733;
+    border-color: #9e7521;
+  }
+  .navbar-default .navbar-brand {
+    color: #ecf0f1;
+  }
+  .navbar-default .navbar-brand:hover,
+  .navbar-default .navbar-brand:focus {
+    color: #4abdac;
+  }
+  .navbar-default .navbar-text {
+    color: #ecf0f1;
+  }
+  .navbar-default .navbar-nav > li > a {
+    color: #ecf0f1;
+  }
+  .navbar-default .navbar-nav > li > a:hover,
+  .navbar-default .navbar-nav > li > a:focus {
+    color: #4abdac;
+  }
+  .navbar-default .navbar-nav > .active > a,
+  .navbar-default .navbar-nav > .active > a:hover,
+  .navbar-default .navbar-nav > .active > a:focus {
+    color: #4abdac;
+    background-color: #9e7521;
+  }
+  .navbar-default .navbar-nav > .open > a,
+  .navbar-default .navbar-nav > .open > a:hover,
+  .navbar-default .navbar-nav > .open > a:focus {
+    color: #4abdac;
+    background-color: #9e7521;
+  }
+  .navbar-default .navbar-toggle {
+    border-color: #9e7521;
+  }
+  .navbar-default .navbar-toggle:hover,
+  .navbar-default .navbar-toggle:focus {
+    background-color: #9e7521;
+  }
+  .navbar-default .navbar-toggle .icon-bar {
+    background-color: #ecf0f1;
+  }
+  .navbar-default .navbar-collapse,
+  .navbar-default .navbar-form {
+    border-color: #ecf0f1;
+  }
+  .navbar-default .navbar-link {
+    color: #ecf0f1;
+  }
+  .navbar-default .navbar-link:hover {
+    color: #4abdac;
+  }
+  
+  @media (max-width: 767px) {
+    .navbar-default .navbar-nav .open .dropdown-menu > li > a {
+      color: #ecf0f1;
+    }
+    .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
+    .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
+      color: #4abdac;
+    }
+    .navbar-default .navbar-nav .open .dropdown-menu > .active > a,
+    .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover,
+    .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
+      color: #4abdac;
+      background-color: #9e7521;
+    }
+  }
+
+.border-between > [class*='col-'] {
+    border-right: 1px solid #e3e3e3;
+ }
+
+ .border-between > [class*='col-']:last-child {
+    border-right: none;
+ }
+
+ .row-border {
+   border-bottom: 1px solid #e3e3e3;
+ }
