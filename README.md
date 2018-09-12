@@ -155,6 +155,10 @@ and open a SQL prompt by opening the database in a SQL session:
 ```
 sqlite3 itemcatalog.db
 ```
+If sqlite3 isn't installed on your VM, install it using this command:
+```
+sudo apt-get install sqlite3
+```
 
 Next, locate the user record:
 ```
@@ -166,3 +170,5 @@ Finally, grant administrator access:
 update user set is_admin = 1 where id = <user_id>;
 ```
 where <user_id> is the id of the user that should receive administrator access.
+
+The user will need to log off and back on for this change to take effect.
