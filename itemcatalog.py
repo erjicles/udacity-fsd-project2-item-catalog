@@ -215,11 +215,14 @@ def newCategory():
     if login_session.get('is_admin') is not True:
         return render_template('notauthorized.html'), 403
     if request.method == 'POST':
-        newCategory = Category(
-            name=request.form['name'])
-        session.add(newCategory)
-        session.commit()
-        return redirect(url_for('showCategories'))
+        if request.form['name'] and not request.form['name'].isspace():
+            newCategory = Category(
+                name=request.form['name'])
+            session.add(newCategory)
+            session.commit()
+            return redirect(url_for('showCategories'))
+        else:
+            return create_json_error_response("Missing name", 400)
     else:
         return render_template('newcategory.html')
 
@@ -237,8 +240,10 @@ def editCategory(category_id):
         editedCategory = session.query(
             Category).filter_by(id=category_id).one()
         if request.method == 'POST':
-            if request.form['name']:
+            if request.form['name'] and not request.form['name'].isspace():
                 editedCategory.name = request.form['name']
+            else:
+                return create_json_error_response("Missing name", 400)
             session.add(editedCategory)
             session.commit()
             return redirect(url_for('showCategory', category_id=category_id))
@@ -321,14 +326,19 @@ def newItem(category_id):
         category = session.query(
             Category).filter_by(id=category_id).one()
         if request.method == 'POST':
-            newItem = Item(
-                name=request.form['name'],
-                description=request.form['description'],
-                category_id=category_id,
-                user_id=login_session['user_id'])
-            session.add(newItem)
-            session.commit()
-            return redirect(url_for('showCategory', category_id=category_id))
+            if request.form['name'] and not request.form['name'].isspace():
+                newItem = Item(
+                    name=request.form['name'],
+                    description=request.form['description'],
+                    category_id=category_id,
+                    user_id=login_session['user_id'])
+                session.add(newItem)
+                session.commit()
+                return redirect(url_for(
+                    'showCategory',
+                    category_id=category_id))
+            else:
+                return create_json_error_response("Missing name", 400)
         else:
             return render_template('newitem.html', category=category)
     except NoResultFound:
@@ -350,7 +360,10 @@ def editItem(item_id):
                     'user_id') != item.user_id):
             return render_template('notauthorized.html'), 403
         if request.method == 'POST':
-            item.name = request.form['name']
+            if request.form['name'] and not request.form['name'].isspace():
+                item.name = request.form['name']
+            else:
+                return create_json_error_response("Missing name", 400)
             item.description = request.form['description']
             request_category_id = -1
             try:
