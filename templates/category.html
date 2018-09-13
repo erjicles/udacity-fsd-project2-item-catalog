@@ -21,18 +21,18 @@
                 {% endif %}
             </div>
         </div>
-        {% if session.get('user_id') is not none %}
-        <div class="row">
-            <div class="col-xs-12">
-                <a href="{{url_for('newItem', category_id = category.id)}}">Add Item</a>
-            </div>
-        </div>
-        {% endif %}
         <div class="row">
             <div class="col-xs-12">
                 <h2>Items</h2>
             </div>
         </div>
+        {% if session.get('user_id') is not none %}
+        <div class="row">
+            <div class="col-xs-12">
+                <a href="{{url_for('newItem', category_id = category.id)}}">+ Add</a>
+            </div>
+        </div>
+        {% endif %}
         {% for item in items %}
             <div class="row">
                 <div class="col-xs-12">
