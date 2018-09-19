@@ -18,6 +18,8 @@ app = Flask(__name__)
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
+app.secret_key = json.loads(
+    open('app_secrets.json', 'r').read())['app']['app_secret_key']
 APPLICATION_NAME = "Item Catalog Application"
 
 # Connect to Database and create database session
@@ -87,13 +89,16 @@ def gconnect():
         return create_json_error_response(
             'Failed to upgrade the authorization code.',
             401)
-
+    
     # Check that the access token is valid.
     access_token = credentials.access_token
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            % access_token)
     h = httplib2.Http()
-    result = json.loads(h.request(url, 'GET')[1])
+    content = h.request(url, 'GET')[1]
+    content_json = content.decode('utf-8')
+    result = json.loads(content_json)
+    
     # If there was an error in the access token info, abort.
     if result.get('error') is not None:
         return create_json_error_response(result.get('error'), 500)
@@ -450,7 +455,5 @@ def getItem(item_id):
 
 
 if __name__ == '__main__':
-    app.secret_key = json.loads(
-        open('app_secrets.json', 'r').read())['app']['app_secret_key']
     app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    app.run()
