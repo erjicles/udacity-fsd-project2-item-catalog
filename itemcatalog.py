@@ -277,7 +277,7 @@ def deleteCategory(category_id):
             return redirect(url_for('showCategories'))
         else:
             return render_template(
-                'deleteCategory.html',
+                'deletecategory.html',
                 category=categoryToDelete)
     except NoResultFound:
         return render_template('notfound.html'), 404
