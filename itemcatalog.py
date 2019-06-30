@@ -1,3 +1,5 @@
+import logging
+logging.debug('--->Entered itemcatalog.py, imported logging')
 from flask import Flask, render_template, request, redirect, jsonify, url_for, \
     flash
 from sqlalchemy import create_engine, asc, desc
@@ -9,18 +11,22 @@ import random
 import string
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
+from google.oauth2 import id_token
+from google.auth.transport import requests
 import httplib2
 import json
 from flask import make_response
-import requests
+logging.debug('--->Finished imports')
 
 app = Flask(__name__)
+logging.debug('--->Flask app initialized')
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 app.secret_key = json.loads(
     open('app_secrets.json', 'r').read())['app']['app_secret_key']
 APPLICATION_NAME = "Item Catalog Application"
+logging.debug('--->Loaded secrets')
 
 # Connect to Database and create database session
 engine = create_engine(
@@ -29,10 +35,12 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+logging.debug('--->Database session created')
 
 
 # Used to form a json response with status code
 def create_json_error_response(message, status):
+    logging.info('--->Entered create_json_error_response')
     response = make_response(json.dumps(message), status)
     response.headers['Content-Type'] = 'application/json'
     return response
@@ -41,6 +49,7 @@ def create_json_error_response(message, status):
 # Create anti-forgery state token
 @app.route('/login')
 def showLogin():
+    logging.info('--->Entered showLogin')
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in range(32))
     login_session['state'] = state
@@ -49,6 +58,7 @@ def showLogin():
 
 
 def createUser(login_session):
+    logging.info('--->Entered createUser')
     newUser = User(name=login_session['username'], email=login_session[
         'email'], picture=login_session['picture'])
     session.add(newUser)
@@ -58,22 +68,27 @@ def createUser(login_session):
 
 
 def getUserInfo(user_id):
+    logging.info('--->Entered getUserInfo')
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
 
 def getUserID(email):
+    logging.info('--->Entered getUserID')
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
     except NoResultFound:
+        logging.info('--->getUserID: No result found for email: ' + email)
         return None
     except MultipleResultsFound:
+        logging.warn('--->getUserID: Multiple results for email: ' + email)
         return None
 
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    logging.info('--->Entered gconnect')
     # Validate state token
     if request.args.get('state') != login_session['state']:
         return create_json_error_response('Invalid state parameter.', 401)
@@ -155,6 +170,7 @@ def gconnect():
 
 @app.route('/gdisconnect')
 def gdisconnect():
+    logging.info('--->Entered gdisconnect')
     # Only disconnect a connected user.
     access_token = login_session.get('access_token')
     if access_token is None:
@@ -173,6 +189,7 @@ def gdisconnect():
 # Disconnect based on provider
 @app.route('/disconnect')
 def disconnect():
+    logging.info('--->Entered disconnect')
     if 'provider' in login_session:
         if login_session['provider'] == 'google':
             gdisconnect()
@@ -194,6 +211,7 @@ def disconnect():
 # Welcome page after logging in
 @app.route('/welcome/')
 def showWelcome():
+    logging.info('--->Entered showWelcome')
     if 'username' not in login_session:
         return redirect('/login')
     return render_template('welcome.html')
@@ -203,6 +221,7 @@ def showWelcome():
 @app.route('/')
 @app.route('/catalog/')
 def showCategories():
+    logging.info('--->Entered showCategories')
     categories = session.query(Category).order_by(asc(Category.name)).all()
     latestItems = session.query(Item).order_by(desc(Item.id)).limit(10).all()
     return render_template(
@@ -214,6 +233,7 @@ def showCategories():
 # Create a new category
 @app.route('/catalog/category/new/', methods=['GET', 'POST'])
 def newCategory():
+    logging.info('--->Entered newCategory')
     if 'username' not in login_session:
         return redirect('/login')
     if login_session.get('is_admin') is not True:
@@ -236,6 +256,7 @@ def newCategory():
     '/catalog/category/<int:category_id>/edit/',
     methods=['GET', 'POST'])
 def editCategory(category_id):
+    logging.info('--->Entered editCategory')
     if 'username' not in login_session:
         return redirect('/login')
     if login_session.get('is_admin') is not True:
@@ -266,6 +287,7 @@ def editCategory(category_id):
     '/catalog/category/<int:category_id>/delete/',
     methods=['GET', 'POST'])
 def deleteCategory(category_id):
+    logging.info('--->Entered deleteCategory')
     if 'username' not in login_session:
         return redirect('/login')
     if login_session.get('is_admin') is not True:
@@ -290,6 +312,7 @@ def deleteCategory(category_id):
 # Show all items for a given category
 @app.route('/catalog/category/<int:category_id>/items/')
 def showCategory(category_id):
+    logging.info('--->Entered showCategory')
     categories = session.query(Category).order_by(asc(Category.name)).all()
     category = next(iter(
         [category for category in categories if category.id == category_id]
@@ -308,6 +331,7 @@ def showCategory(category_id):
 # Show one item
 @app.route('/catalog/item/<int:item_id>/')
 def showItem(item_id):
+    logging.info('--->Entered showItem')
     try:
         item = session.query(
             Item).filter_by(id=item_id).one()
@@ -323,6 +347,7 @@ def showItem(item_id):
     '/catalog/category/<int:category_id>/items/new/',
     methods=['GET', 'POST'])
 def newItem(category_id):
+    logging.info('--->Entered newItem')
     if 'username' not in login_session:
         return redirect('/login')
     # Any logged in user can create an item, so don't check user id
@@ -354,6 +379,7 @@ def newItem(category_id):
 # Edit existing item
 @app.route('/catalog/item/<int:item_id>/edit/', methods=['GET', 'POST'])
 def editItem(item_id):
+    logging.info('--->Entered editItem')
     if 'username' not in login_session:
         return redirect('/login')
     try:
@@ -401,6 +427,7 @@ def editItem(item_id):
 # Delete existing item
 @app.route('/catalog/item/<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(item_id):
+    logging.info('--->Entered deleteItem')
     if 'username' not in login_session:
         return redirect('/login')
     try:
@@ -426,6 +453,7 @@ def deleteItem(item_id):
 # API endpoint to retrieve all categories
 @app.route('/api/catalog/categories/')
 def getCategories():
+    logging.info('--->Entered getCategories')
     categories = session.query(Category).all()
     return jsonify(categories=[i.serialize for i in categories])
 
@@ -433,6 +461,7 @@ def getCategories():
 # API endpoint to retrieve one category
 @app.route('/api/catalog/categories/<int:category_id>/')
 def getCategory(category_id):
+    logging.info('--->Entered getCategory')
     try:
         category = session.query(Category).filter_by(id=category_id).one()
         return jsonify(category=category.serialize)
@@ -445,6 +474,7 @@ def getCategory(category_id):
 # API endpoint to retrieve one item
 @app.route('/api/catalog/items/<int:item_id>/')
 def getItem(item_id):
+    logging.info('--->Entered getItem')
     try:
         item = session.query(Item).filter_by(id=item_id).one()
         return jsonify(item=item.serialize)
@@ -455,5 +485,6 @@ def getItem(item_id):
 
 
 if __name__ == '__main__':
+    logging.info('--->Entered __main__')
     app.debug = True
     app.run()
