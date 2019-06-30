@@ -1,49 +1,53 @@
 {% extends "main.html" %}
 {% block head_extension %}
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<script src="//apis.google.com/js/platform.js?onload=start"></script>
 {% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-xs-12">
         <!-- BEGIN Google login -->
-        <div id="signinButton">
-            <span class="g-signin"
-                data-scope="openid email"
-                data-clientid="231521323853-lf0md8miq1phse56bpcb26hlq53fc3v5.apps.googleusercontent.com"
-                data-redirecturi="postmessage"
-                data-accesstype="offline"
-                data-cookiepolicy="single_host_origin"
-                data-callback="signInCallback"
-                data-approvalprompt="force">
-            </span>
-        </div>
+        <div id="signinButton" class="g-signin2" data-onsuccess="onSignIn" data-onfailure="onSignInFailure"></div>
         <div id="result"></div>
         <script>
-        function signInCallback(authResult) {
-            if (authResult['code']) {
+        function onSignIn(googleUser) {
+            var id_token = googleUser.getAuthResponse().id_token;
+            if (id_token) {
                 // Hide the sign-in button now that the user is authorized
                 $('#signinButton').attr('style', 'display: none');
-            
-                // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
+                
+                // Send the id token to the server
+                // If the server responds, write a 'login successful' message
+                // to the web page and then redirect back to the main 
+                // itemcatalog page
+                let requestData = {
+                    'idtoken': id_token
+                };
                 $.ajax({
                     type: 'POST',
                     url: '/gconnect?state={{STATE}}',
-                    processData: false,
-                    data: authResult['code'],
-                    contentType: 'application/octet-stream; charset=utf-8',
-                    success: function(result) {
-                        // Handle or verify the server response if necessary.
-                        if (result) {
-                            window.location.href = "/welcome/";
-                        } else if (authResult['error']) {
-                            console.log('There was an error: ' + authResult['error']);
-                        } else {
-                            $('#result').html('Failed to make a server-side call. Check your configuration and console.');
-                        }
+                    data: JSON.stringify(requestData),
+                    contentType: 'application/json; charset=utf-8'
+                }).done(function(result){
+                    // Handle or verify the server response if necessary.
+                    if (result) {
+                        window.location.href = "/welcome/";
+                    } else {
+                        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
                     }
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
                 });
             }
+        
+            //var profile = googleUser.getBasicProfile();
+            //console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+            //console.log('Name: ' + profile.getName());
+            //console.log('Image URL: ' + profile.getImageUrl());
+            //console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+        }
+        
+        function onSignInFailure(error) {
+            var errorMessage = 'Login failure, error message: ' + error;
+            $('#result').html(errorMessage);
         }
         </script>
         <!-- END Google login -->

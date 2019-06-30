@@ -92,72 +92,48 @@ def gconnect():
     # Validate state token
     if request.args.get('state') != login_session['state']:
         return create_json_error_response('Invalid state parameter.', 401)
-    # Obtain authorization code
-    code = request.data
-
+    # Obtain id token
+    requestData = request.get_json()
+    idtoken = requestData.get('idtoken')
+    idinfo = None
+    
     try:
-        # Upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
-        oauth_flow.redirect_uri = 'postmessage'
-        credentials = oauth_flow.step2_exchange(code)
-    except FlowExchangeError:
+        idinfo = id_token.verify_oauth2_token(idtoken, requests.Request())
+        if idinfo['aud'] not in [CLIENT_ID]:
+            logging.warn('--->Invalid audience: ' + str(idinfo['aud']))
+            raise ValueError('Could not verify audience.')
+        
+        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            logging.warn('--->Wrong issuer: ' + str(idinfo['iss']))
+            raise ValueError('Wrong issuer.')
+    except ValueError as e:
+        logging.error('--->ID token value error: ' + str(e))
         return create_json_error_response(
-            'Failed to upgrade the authorization code.',
+            'Invalid ID token',
             401)
     
-    # Check that the access token is valid.
-    access_token = credentials.access_token
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
-           % access_token)
-    h = httplib2.Http()
-    content = h.request(url, 'GET')[1]
-    content_json = content.decode('utf-8')
-    result = json.loads(content_json)
-    
-    # If there was an error in the access token info, abort.
-    if result.get('error') is not None:
-        return create_json_error_response(result.get('error'), 500)
-
-    # Verify that the access token is used for the intended user.
-    gplus_id = credentials.id_token['sub']
-    if result['user_id'] != gplus_id:
-        return create_json_error_response(
-            "Token's user ID doesn't match given user ID.",
-            401)
-
-    # Verify that the access token is valid for this app.
-    if result['issued_to'] != CLIENT_ID:
-        print("Token's client ID does not match app's.")
-        return create_json_error_response(
-            "Token's client ID does not match app's.",
-            401)
-
+    userid = idinfo['sub']
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
-    if stored_access_token is not None and gplus_id == stored_gplus_id:
+    if stored_access_token is not None and userid == stored_gplus_id:
+        logging.info('--->...already logged in')
         return create_json_error_response(
             'Current user is already connected.',
             200)
 
     # Store the access token in the session for later use.
-    login_session['access_token'] = credentials.access_token
-    login_session['gplus_id'] = gplus_id
+    login_session['access_token'] = idtoken
+    login_session['gplus_id'] = userid
 
     # Get user info
-    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-    params = {'access_token': credentials.access_token, 'alt': 'json'}
-    answer = requests.get(userinfo_url, params=params)
-
-    data = answer.json()
-
-    login_session['username'] = data['name']
-    login_session['picture'] = data['picture']
-    login_session['email'] = data['email']
+    login_session['username'] = idinfo['name']
+    login_session['picture'] = idinfo['picture']
+    login_session['email'] = idinfo['email']
     # ADD PROVIDER TO LOGIN SESSION
     login_session['provider'] = 'google'
 
     # see if user exists, if it doesn't make a new one
-    user_id = getUserID(data["email"])
+    user_id = getUserID(idinfo["email"])
     if not user_id:
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
@@ -192,7 +168,7 @@ def disconnect():
     logging.info('--->Entered disconnect')
     if 'provider' in login_session:
         if login_session['provider'] == 'google':
-            gdisconnect()
+            # gdisconnect()
             del login_session['gplus_id']
             del login_session['access_token']
         del login_session['username']

@@ -15,7 +15,7 @@
                 <a href="{{url_for('showLogin')}}">Login</a>
                 {% else %}
                 Welcome, {{session['username']}}! |
-                <a href="{{url_for('disconnect')}}">Logout </a>
+                <a href="#" onclick="signOut();">Logout </a>
                 {% endif %}
             </p>
         </div>
